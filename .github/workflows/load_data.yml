@@ -26,4 +26,4 @@ jobs:
     - name: Login to WandB
       run: wandb login ${{ secrets.WANDB_API_KEY }}
     - name: Run load_data.py
-      run: python src/data/load.py --IdExecution ${{ github.run_number }}
+      run: python src/data/load_data.py --IdExecution ${{ github.run_number }}
