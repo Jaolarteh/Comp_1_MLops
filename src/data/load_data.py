@@ -29,8 +29,8 @@ def load(train_size=.8):
         test_size= 1 - train_size, random_state=42,
         stratify= train['Loan_Status'].map({'Y': 1, 'N': 0})
         )
-
-    test_set = pd.read_csv('../raw_data/loanpred_train.csv')
+    file_path = os.path.join(base_path.split('src')[0],'src', 'raw_data/loanpred_test.csv')
+    test_set = pd.read_csv(file_path)
 
     datasets = [train_set, val_set, test_set]
 
