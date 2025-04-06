@@ -19,7 +19,10 @@ def load(train_size=.8):
     """
       
     # the data, split between train and test sets
-    train = pd.read_csv('../raw_data/loanpred_train.csv')
+
+    base_path = os.path.dirname(__file__)
+    file_path = os.path.join(base_path, '../raw_data/loanpred_train.csv')
+    train = pd.read_csv(file_path)
 
     train_set, val_set= train_test_split(
         train,
