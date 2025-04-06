@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'src/data/load_data.py'
+  workflow_dispatch: # Allows manual execution only
 
 jobs:
   load_data:
@@ -24,5 +25,5 @@ jobs:
         pip install -r requirements.txt
     - name: Login to WandB
       run: wandb login ${{ secrets.WANDB_API_KEY }}
-    - name: Run load.py
+    - name: Run load_data.py
       run: python src/data/load.py --IdExecution ${{ github.run_number }}
