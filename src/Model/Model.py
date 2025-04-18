@@ -19,6 +19,7 @@ if args.IdExecution:
 
 # Función de optimización
 def objective(trial):
+    global X_train, y_train
     model_name = trial.suggest_categorical("model", ["xgb", "rf"])
     
     if model_name == "xgb":
@@ -59,10 +60,11 @@ def objective(trial):
 
 
 def search_and_train():
+    global X_train, y_train  
 
     with wandb.init(
         project="MLOps-ClassAssigment",
-        name=f"Load Raw Data ExecId-{args.IdExecution}", job_type="model-selection") as run:  
+        name=f"Model training ExecId-{args.IdExecution}", job_type="model-selection") as run:  
 
         # Descargar artifact de datos preprocesados
         artifact = run.use_artifact('preprocessed-data:latest', type='dataset')
@@ -115,7 +117,6 @@ def search_and_train():
         model_artifact.add_file(model_path)
 
         run.log_artifact(model_artifact)
-        run.finish()
 
         # Limpieza
         os.remove(model_path)
