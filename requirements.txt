@@ -3,6 +3,11 @@ matplotlib
 scikit-learn
 wandb
 pandas
+<<<<<<< HEAD
 xgboost
 scikit-learn
 optuna
+=======
+optuna
+xgboost
+>>>>>>> a268623f2358a52cb44f7767135e54f0aae2abd7
