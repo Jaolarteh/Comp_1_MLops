@@ -68,6 +68,8 @@ def preprocessing_and_log():
         X_val[target] = np.where(val_df[target] == 'Y', 1, 0)
         X_test = Preprocess.transform(test_df)
 
+        print(X_train.head(5))
+
         feature_names = numerical_features + categorical_features
         artifact = wandb.Artifact(
             "preprocessed-data", type="dataset",
