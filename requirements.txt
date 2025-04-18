@@ -3,7 +3,6 @@ matplotlib
 scikit-learn
 wandb
 pandas
-sklearn
 optuna
 xgboost
 pickle
