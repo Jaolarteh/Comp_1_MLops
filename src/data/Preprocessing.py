@@ -45,54 +45,72 @@ def pipeline_training(Train_dataset):
 
     return(data_pipeline.fit(Train_dataset.drop(columns=[target])))
 
+# Preprocessing.py
+
+# ... (todo tu código anterior igual)
 
 def preprocessing_and_log():
+    with wandb.init(project="MLOps-ClassAssigment", name=f"Preprocess Data ExecId-{args.IdExecution}", job_type="preprocess-data") as run:
+        try:
+            print("Buscando artifact de datos crudos...")
+            artifact = run.use_artifact('jaolarteh-universidad-eafit/MLOps-ClassAssigment/data-:v0', type='dataset')
+            artifact_dir = artifact.download()
+            print(f"Artifact descargado en: {artifact_dir}")
+        except Exception as e:
+            print(f"Error al usar artifact: {e}")
+            return  # Termina si falla
 
-    with wandb.init(project="MLOps-ClassAssigment",name=f"Preprocess Data ExecId-{args.IdExecution}", job_type="preprocess-data") as run:
-        
-        artifact = run.use_artifact('MLOps-ClassAssigment/data-:latest', type='dataset')
-        artifact_dir = artifact.download()
-
-
-        train_df = pd.read_csv(f"{artifact_dir}/Train.csv")
-        val_df = pd.read_csv(f"{artifact_dir}/Val.csv")
-        test_df = pd.read_csv(f"{artifact_dir}/Test.csv")
+        try:
+            train_df = pd.read_csv(f"{artifact_dir}/Train.csv")
+            val_df = pd.read_csv(f"{artifact_dir}/Val.csv")
+            test_df = pd.read_csv(f"{artifact_dir}/Test.csv")
+            print("Datos cargados exitosamente.")
+        except Exception as e:
+            print(f"Error al cargar datasets: {e}")
+            return
 
         Preprocess = pipeline_training(train_df)
+        print("Pipeline de preprocesamiento entrenado.")
 
-
-
+        # Transformación
         X_train = Preprocess.transform(train_df.drop(columns=[target]))
+        X_train = recover_dataframe(X_train)
         X_train[target] = np.where(train_df[target] == 'Y', 1, 0)
+
         X_val = Preprocess.transform(val_df.drop(columns=[target]))
+        X_val = recover_dataframe(X_val)
         X_val[target] = np.where(val_df[target] == 'Y', 1, 0)
+
         X_test = Preprocess.transform(test_df)
+        X_test = recover_dataframe(X_test)
 
-        print(X_train.head(5))
+        print("Datos transformados.")
 
-        feature_names = numerical_features + categorical_features
+        # Crear artifact
         artifact = wandb.Artifact(
             "preprocessed-data", type="dataset",
             description="Train/Val/Test preprocesados",
-            metadata={"features": feature_names, "target": target}
+            metadata={"features": numerical_features + categorical_features, "target": target}
         )
 
-        # Crear datasets y nombres
+        os.makedirs("temp_data", exist_ok=True)
+
         datasets = [X_train, X_val, X_test]
         names = ["X_train", "X_val", "X_test"]
-
-        # Crear carpeta temporal
-        os.makedirs("temp_data", exist_ok=True)
 
         for name, df in zip(names, datasets):
             file_path = f"temp_data/{name}.csv"
             df.to_csv(file_path, index=False)
             artifact.add_file(file_path, name=f"{name}.csv")
 
-        # Loggear artefacto
         run.log_artifact(artifact)
+        print("Artifact loggeado exitosamente.")
 
-        # Limpieza opcional
+        # Limpieza
         for name in names:
             os.remove(f"temp_data/{name}.csv")
         os.rmdir("temp_data")
+        print("Archivos temporales eliminados.")
+
+if __name__ == "__main__":
+    preprocessing_and_log()
